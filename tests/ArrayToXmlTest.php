@@ -107,6 +107,14 @@ class ArrayToXmlTest extends TestCase
     }
 
     /** @test */
+    public function it_can_handle_zero_values_in_beginning_of_basic_collection()
+    {
+        $this->assertMatchesXmlSnapshot(ArrayToXml::convert([
+            'user' => ['0', '1', '0'],
+        ]));
+    }
+
+    /** @test */
     public function it_accepts_an_xml_encoding_type()
     {
         $this->assertMatchesXmlSnapshot(ArrayToXml::convert([], '', false, 'UTF-8'));
@@ -384,5 +392,28 @@ class ArrayToXmlTest extends TestCase
                 ],
             ],
         ]));
+    }
+
+    /** @test */
+    public function setting_invalid_properties_will_result_in_an_exception()
+    {
+        $this->expectException(\Exception::class);
+        $xml2Array = new ArrayToXml($this->testArray);
+
+        $xml2Array->setDomProperties(['foo' => 'bar']);
+    }
+
+    /** @test */
+    public function it_can_set_dom_properties()
+    {
+        $xml2Array = new ArrayToXml($this->testArray);
+        $xml2Array->setDomProperties([
+            'formatOutput' => true,
+            'version' => '1234567',
+        ]);
+
+        $dom = $xml2Array->toDom();
+        $this->assertTrue($dom->formatOutput);
+        $this->assertEquals('1234567', $dom->version);
     }
 }
